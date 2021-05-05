@@ -145,7 +145,10 @@ def main():
     parser_none.set_defaults(func=NONEALG)
 
     args = parser.parse_args()
-    args.func(args)
+    try:
+        args.func(args)
+    except Exception as e:
+        parser.parse_args('-h')
 
 if __name__ == "__main__":
     main()
